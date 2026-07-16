@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>लूडो गेम</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background-color: #f0f0f0; margin: 0; padding: 0; padding-bottom: 60px; }
+        h1 { color: #333; margin-top: 10px; font-size: 24px; }
+        #board { width: 90vw; height: 90vw; max-width: 360px; max-height: 360px; margin: 10px auto; position: relative; background-color: #fff; border: 4px solid #333; }
+        .home { width: 40%; height: 40%; position: absolute; display: flex; justify-content: center; align-items: center; }
+        #red-home { top: 0; left: 0; background-color: #ff4d4d; }
+        #green-home { bottom: 0; right: 0; background-color: #2ecc71; }
+        .token { width: 30px; height: 30px; border-radius: 50%; border: 3px solid #fff; position: absolute; transition: all 0.3s ease; }
+        #red-token { background-color: #b30000; }
+        #green-token { background-color: #1b5e20; }
+        .controls { margin-top: 15px; }
+        button { padding: 12px 24px; font-size: 18px; background-color: #008cba; color: white; border: none; border-radius: 5px; }
+        #dice-result { font-size: 24px; font-weight: bold; margin: 8px; }
+        #status { font-size: 18px; color: #555; }
+    </style>
+</head>
+<body>
+    <h1>लूडो गेम</h1>
+    <div id="status">बारी: <span id="current-player" style="color:red; font-weight:bold;">लाल</span></div>
+    <div id="board">
+        <div id="red-home" class="home"><div id="red-token" class="token" onclick="moveToken('red')"></div></div>
+        <div id="green-home" class="home"><div id="green-token" class="token" onclick="moveToken('green')"></div></div>
+    </div>
+    <div class="controls">
+        <button id="dice-btn" onclick="rollDice()">🎲 पासा फेंकें</button>
+        <div id="dice-result">🎲 -</div>
+    </div>
+    <script>
+        let turn = 'red'; let diceValue = 0; let hasRolled = false; let positions = { red: 0, green: 0 }; const winningPosition = 10;
+        const statusText = document.getElementById('current-player'); const diceResult = document.getElementById('dice-result');
+        document.getElementById('red-token').style.top = 'calc(50% - 15px)'; document.getElementById('red-token').style.left = 'calc(50% - 15px)';
+        document.getElementById('green-token').style.top = 'calc(50% - 15px)'; document.getElementById('green-token').style.left = 'calc(50% - 15px)';
+        function rollDice() {
+            if (hasRolled) return;
+            diceValue = Math.floor(Math.random() * 6) + 1; diceResult.innerText = `🎲 ${diceValue}`; hasRolled = true;
+            if (positions[turn] === 0 && diceValue !== 6) { setTimeout(() => { switchTurn(); }, 800); }
+        }
+        function moveToken(player) {
+            if (!hasRolled || player !== turn) return;
+            let token = document.getElementById(`${player}-token`);
+            if (positions[player] === 0 && diceValue === 6) {
+                positions[player] = 1;
+                if (player === 'red') { token.style.top = '45%'; token.style.left = '5%'; } 
+                else { token.style.top = '45%'; token.style.left = '85%'; }
+                resetDice(); return;
+            } else if (positions[player] > 0) {
+                positions[player] += diceValue; let currentMove = positions[player] * 7;
+                if (player === 'red') { token.style.left = `${5 + currentMove}%`; } 
+                else { token.style.left = `${85 - currentMove}%`; }
+                if (positions[player] >= winningPosition) {
+                    alert(`🎉 ${player === 'red' ? 'लाल' : 'हरा'} जीत गया!`);
+                    if(window.AppCreator24) { window.AppCreator24.showInterstitial(); } // ऐप बिल्डर का ऐड ट्रिगर
+                    resetGame(); return;
+                }
+            }
+            if (diceValue === 6) { resetDice(); } else { switchTurn(); }
+        }
+        function switchTurn() { turn = (turn === 'red') ? 'green' : 'red'; statusText.innerText = turn === 'red' ? 'लाल' : 'हरा'; statusText.style.color = turn === 'red' ? 'red' : 'green'; resetDice(); }
+        function resetDice() { diceValue = 0; hasRolled = false; diceResult.innerText = `🎲 -`; }
+        function resetGame() {
+            positions = { red: 0, green: 0 };
+            document.getElementById('red-token').style.top = 'calc(50% - 15px)'; document.getElementById('red-token').style.left = 'calc(50% - 15px)';
+            document.getElementById('green-token').style.top = 'calc(50% - 15px)'; document.getElementById('green-token').style.left = 'calc(50% - 15px)';
+            turn = 'red'; statusText.innerText = 'लाल'; statusText.style.color = 'red'; resetDice();
+        }
+    </script>
+</body>
+</html>
